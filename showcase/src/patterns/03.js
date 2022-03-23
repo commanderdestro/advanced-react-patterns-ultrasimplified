@@ -1,4 +1,12 @@
-import React, { Component, useLayoutEffect, useState, useCallback, createContext, useContext, useMemo } from 'react';
+import React, {
+  Component,
+  useLayoutEffect,
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  useMemo,
+} from 'react';
 import mojs from 'mo-js';
 import styles from './index.css';
 
@@ -105,7 +113,7 @@ const useClapAnimation = ({ clapEl, countEl, clapTotalEl }) => {
 const MediumClapContext = createContext();
 const { Provider } = MediumClapContext;
 
-const MediumClap = ({children}) => {
+const MediumClap = ({ children }) => {
   const MAXIMUM_USER_CLAP = 50;
   const [clapState, setClapState] = useState(initialState);
   const { count } = clapState;
@@ -134,10 +142,13 @@ const MediumClap = ({children}) => {
     }));
   };
 
-  const memoizedValue = useMemo(() => ({
+  const memoizedValue = useMemo(
+    () => ({
       ...clapState,
       setRef,
-  }), [clapState, setRef]);
+    }),
+    [clapState, setRef]
+  );
 
   return (
     <Provider value={memoizedValue}>
@@ -152,8 +163,10 @@ const MediumClap = ({children}) => {
  * subcomponents
  */
 
+
+
 const ClapIcon = _ => {
-    const {isClicked} = useContext(MediumClapContext);
+  const { isClicked } = useContext(MediumClapContext);
   return (
     <span>
       <svg
@@ -168,7 +181,7 @@ const ClapIcon = _ => {
   );
 };
 const ClapCount = _ => {
-    const {count, setRef} = useContext(MediumClapContext);
+  const { count, setRef } = useContext(MediumClapContext);
   return (
     <span ref={setRef} data-refkey='clapCountRef' className={styles.count}>
       + {count}
@@ -177,13 +190,17 @@ const ClapCount = _ => {
 };
 
 const CountTotal = _ => {
-    const {countTotal, setRef} = useContext(MediumClapContext);
+  const { countTotal, setRef } = useContext(MediumClapContext);
   return (
     <span ref={setRef} data-refkey='clapTotalRef' className={styles.total}>
       {countTotal}
     </span>
   );
 };
+
+MediumClap.Icon = ClapIcon;
+MediumClap.Count = ClapCount;
+MediumClap.CountTotal = CountTotal;
 
 /**
  * Usage
@@ -192,9 +209,9 @@ const CountTotal = _ => {
 const Usage = () => {
   return (
     <MediumClap>
-      <ClapIcon />
-      <ClapCount />
-      <CountTotal />
+      <MediumClap.Icon />
+      <MediumClap.Count />
+      <MediumClap.CountTotal />
     </MediumClap>
   );
 };
