@@ -21,7 +21,7 @@ const useClapAnimation = ({ clapEl, countEl, clapTotalEl }) => {
 
     const tlDuration = 300;
     const scaleButton = new mojs.Html({
-      el: '#clap',
+      el: clapEl,
       duration: tlDuration,
       scale: { 1.3: 1 },
       easing: mojs.easing.ease.out,
@@ -112,9 +112,9 @@ const MediumClap = _ => {
   const setRef = useCallback(node => {
     setRefState(prevRefState => ({
       ...prevRefState,
-      [node.dataset.refKey]: node,
+      [node.dataset.refkey]: node,
     }));
-  });
+  }, []);
 
   const animationTimeline = useClapAnimation({
     clapEl: clapRef,
@@ -132,7 +132,7 @@ const MediumClap = _ => {
   };
 
   return (
-    <button ref={setRef()} data-refkey='clapRef' className={styles.clap} onClick={handleClapClick}>
+    <button ref={setRef} data-refkey='clapRef' className={styles.clap} onClick={handleClapClick}>
       <ClapIcon isClicked={isClicked} />
       <ClapCount count={count} setRef={setRef} />
       <CountTotal countTotal={countTotal} setRef={setRef} />
