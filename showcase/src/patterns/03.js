@@ -6,6 +6,7 @@ import React, {
   createContext,
   useContext,
   useMemo,
+  useEffect,
 } from 'react';
 import mojs from 'mo-js';
 import styles from './index.css';
@@ -113,7 +114,7 @@ const useClapAnimation = ({ clapEl, countEl, clapTotalEl }) => {
 const MediumClapContext = createContext();
 const { Provider } = MediumClapContext;
 
-const MediumClap = ({ children }) => {
+const MediumClap = ({ children, onClap }) => {
   const MAXIMUM_USER_CLAP = 50;
   const [clapState, setClapState] = useState(initialState);
   const { count } = clapState;
@@ -132,6 +133,11 @@ const MediumClap = ({ children }) => {
     countEl: clapCountRef,
     clapTotalEl: clapTotalRef,
   });
+
+  useEffect(() => {
+    console.log('i have been invoked');
+    onClap && onClap(clapState);
+  }, [count]);
 
   const handleClapClick = () => {
     animationTimeline.replay();
@@ -162,8 +168,6 @@ const MediumClap = ({ children }) => {
 /**
  * subcomponents
  */
-
-
 
 const ClapIcon = _ => {
   const { isClicked } = useContext(MediumClapContext);
@@ -207,12 +211,19 @@ MediumClap.CountTotal = CountTotal;
  */
 
 const Usage = () => {
+  const [count, setCount] = useState(0);
+  const handleClap = clapState => {
+    setCount(clapState.count);
+  };
   return (
-    <MediumClap>
-      <MediumClap.Icon />
-      <MediumClap.Count />
-      <MediumClap.CountTotal />
-    </MediumClap>
+    <div className={styles.info}>
+      <MediumClap onClap={handleClap}>
+        <MediumClap.Icon />
+        <MediumClap.Count />
+        <MediumClap.CountTotal />
+      </MediumClap>
+      <div>{`You have clapped ${count} times.`}</div>
+    </div>
   );
 };
 
