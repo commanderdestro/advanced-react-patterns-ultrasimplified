@@ -1,6 +1,7 @@
 import React, { Component, useLayoutEffect, useState, useCallback, useRef, useEffect } from 'react';
 import mojs from 'mo-js';
 import styles from './index.css';
+import userStyles from './usage.css';
 
 const INITIAL_STATE = {
   count: 0,
@@ -119,15 +120,17 @@ const useDOMRef = _ => {
   return [DOMRef, setRef];
 };
 
-
-const callFnsInSequence = (...fns) => (...args) => {
+const callFnsInSequence =
+  (...fns) =>
+  (...args) => {
     fns.forEach(fn => fn && fn(...args));
-}
+  };
 /*
 custom hook for useclapstate
 */
 const useClapState = (initialState = INITIAL_STATE) => {
   const MAXIMUM_USER_CLAP = 50;
+  const initialStateRef = useRef(initialState);
   const [clapState, setClapState] = useState(initialState);
   const { count, countTotal } = clapState;
 
@@ -138,6 +141,10 @@ const useClapState = (initialState = INITIAL_STATE) => {
       countTotal: count < MAXIMUM_USER_CLAP ? countTotal + 1 : countTotal,
     }));
   }, [count, countTotal]);
+
+  const reset = useCallback(() => {
+    setClapState(initialStateRef.current);
+  }, [setClapState]);
 
   const getTogglerProps = ({ onClick, ...otherProps }) => ({
     onClick: callFnsInSequence(updateClapState, onClick),
@@ -153,7 +160,7 @@ const useClapState = (initialState = INITIAL_STATE) => {
     ...otherProps,
   });
 
-  return { clapState, updateClapState, getTogglerProps, getCounterProps };
+  return { clapState, updateClapState, getTogglerProps, getCounterProps, reset };
 };
 
 /*
@@ -215,9 +222,14 @@ const CountTotal = ({ countTotal, setRef, ...restProps }) => {
 /**
  * Usage
  */
-
+const userInitialState = {
+  count: 0,
+  countTotal: 1000,
+  isClicked: false,
+};
 const Usage = () => {
-  const { clapState, updateClapState, getTogglerProps, getCounterProps } = useClapState();
+  const { clapState, updateClapState, getTogglerProps, getCounterProps, reset } =
+    useClapState(userInitialState);
   const { count, countTotal, isClicked } = clapState;
 
   const [{ clapRef, clapCountRef, clapTotalRef }, setRef] = useDOMRef();
@@ -237,15 +249,25 @@ const Usage = () => {
   };
 
   return (
-    <ClapContainer
-      setRef={setRef}
-      data-refkey='clapRef'
-      {...getTogglerProps({ onClick: handleClick, 'aria-pressed': false })}
-    >
-      <ClapIcon isClicked={isClicked} />
-      <ClapCount setRef={setRef} data-refkey='clapCountRef' {...getCounterProps()} />
-      <CountTotal countTotal={countTotal} setRef={setRef} data-refkey='clapTotalRef' />
-    </ClapContainer>
+    <>
+      <ClapContainer
+        setRef={setRef}
+        data-refkey='clapRef'
+        {...getTogglerProps({ onClick: handleClick, 'aria-pressed': false })}
+      >
+        <ClapIcon isClicked={isClicked} />
+        <ClapCount setRef={setRef} data-refkey='clapCountRef' {...getCounterProps()} />
+        <CountTotal countTotal={countTotal} setRef={setRef} data-refkey='clapTotalRef' />
+      </ClapContainer>
+      <section>
+        <button onClick={reset} className={userStyles.resetBtn}>
+          reset
+        </button>
+        <pre className={userStyles.resetMsg} >
+            {JSON.stringify({count, countTotal, isClicked})}
+        </pre>
+      </section>
+    </>
   );
 };
 
