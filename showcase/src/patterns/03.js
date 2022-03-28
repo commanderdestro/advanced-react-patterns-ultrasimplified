@@ -7,6 +7,7 @@ import React, {
   useContext,
   useMemo,
   useEffect,
+  useRef,
 } from 'react';
 import mojs from 'mo-js';
 import styles from './index.css';
@@ -134,9 +135,13 @@ const MediumClap = ({ children, onClap }) => {
     clapTotalEl: clapTotalRef,
   });
 
+  const componentJustMounted = useRef(true);
   useEffect(() => {
-    console.log('i have been invoked');
-    onClap && onClap(clapState);
+    if (!componentJustMounted.current) {
+      console.log('i have been invoked');
+      onClap && onClap(clapState);
+    }
+    componentJustMounted.current = false;
   }, [count]);
 
   const handleClapClick = () => {
@@ -216,13 +221,13 @@ const Usage = () => {
     setCount(clapState.count);
   };
   return (
-    <div className={styles.info}>
+    <div style={{width: '100%'}}>
       <MediumClap onClap={handleClap}>
         <MediumClap.Icon />
         <MediumClap.Count />
         <MediumClap.CountTotal />
       </MediumClap>
-      <div>{`You have clapped ${count} times.`}</div>
+      <div>{!!count && `You have clapped ${count} times.`}</div>
     </div>
   );
 };
