@@ -2,7 +2,7 @@ import React, { Component, useLayoutEffect, useState, useCallback } from 'react'
 import mojs from 'mo-js';
 import styles from './index.css';
 
-const initialState = {
+const INITIAL_STATE = {
   count: 0,
   countTotal: 267,
   isClicked: false,
@@ -98,7 +98,7 @@ const useClapAnimation = ({ clapEl, countEl, clapTotalEl }) => {
       circleBurst,
     ]);
     setAnimationTimeline(newAnimationTimeline);
-  }, [clapEl, countEl, clapTotalEl ]);
+  }, [clapEl, countEl, clapTotalEl]);
   return animationTimeline;
 };
 
@@ -107,7 +107,7 @@ useDOMRef Hook
 */
 
 const useDOMRef = _ => {
-    const [DOMRef, setRefState] = useState({});
+  const [DOMRef, setRefState] = useState({});
 
   const setRef = useCallback(node => {
     setRefState(prevRefState => ({
@@ -116,17 +116,30 @@ const useDOMRef = _ => {
     }));
   }, []);
 
+  return [DOMRef, setRef];
+};
 
-  return [DOMRef, setRef]
-}
-
-const MediumClap = _ => {
+/*
+custom hook for useclapstate
+*/
+const useClapState = (initialState = INITIAL_STATE) => {
   const MAXIMUM_USER_CLAP = 50;
   const [clapState, setClapState] = useState(initialState);
-  const { count, countTotal, isClicked } = clapState;
+  const {count, countTotal} = clapState;
+  const updateClapState = useCallback(() => {
+    setClapState(({ count, countTotal }) => ({
+      isClicked: true,
+      count: Math.min(count + 1, MAXIMUM_USER_CLAP),
+      countTotal: count < MAXIMUM_USER_CLAP ? countTotal + 1 : countTotal,
+    }));
+  }, [count, countTotal]);
+  return [clapState, updateClapState];
+};
 
-  const [{clapRef, clapCountRef, clapTotalRef}, setRef] = useDOMRef();
-  
+const MediumClap = _ => {
+  const [{ count, countTotal, isClicked }, updateClapState] = useClapState();
+  const [{ clapRef, clapCountRef, clapTotalRef }, setRef] = useDOMRef();
+
   const animationTimeline = useClapAnimation({
     clapEl: clapRef,
     countEl: clapCountRef,
@@ -135,11 +148,7 @@ const MediumClap = _ => {
 
   const handleClapClick = () => {
     animationTimeline.replay();
-    setClapState(prevState => ({
-      isClicked: true,
-      count: Math.min(count + 1, MAXIMUM_USER_CLAP),
-      countTotal: count < MAXIMUM_USER_CLAP ? prevState.countTotal + 1 : prevState.countTotal,
-    }));
+    updateClapState();
   };
 
   return (
